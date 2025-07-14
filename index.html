@@ -1386,6 +1386,7 @@
     
                 // Group data by clinic
                 parsedData.forEach(entry => {
+        if(entry.Clinic && entry.Clinic.trim() !== 'Allerton') return; // skip non-Allerton
                     const clinicName = entry.Clinic;
                     if (!allClinicsData[clinicName]) {
                         allClinicsData[clinicName] = [];
