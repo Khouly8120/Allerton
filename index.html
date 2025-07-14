@@ -1070,6 +1070,18 @@
         });
         selectedClinic = 'Allerton';
 
+        // Remove any non-Allerton clinic data from loaded datasets
+        if(window.allClinicsData){
+            Object.keys(allClinicsData).forEach(name=>{ if(name!== 'Allerton') delete allClinicsData[name];});
+        }
+        if(window.allClinicsDailyData){
+            Object.keys(allClinicsDailyData).forEach(name=>{ if(name!== 'Allerton') delete allClinicsDailyData[name];});
+        }
+
+        // Refresh filtered views after data pruning
+        if(typeof filterTable === 'function') filterTable();
+        if(typeof renderDailyCurrent === 'function') renderDailyCurrent();
+
         // displayValidationMessages(); // Validation messages hidden on success
         hideLoading();
     
@@ -1612,6 +1624,10 @@
                         dailyBenchmarkData[r.Date+'|'+r.Clinic] = r;
                     });
                     processAndStoreDailyData(dailyParsed);
+                    // Remove non-Allerton clinics from daily dataset
+                    if(window.allClinicsDailyData){
+                        Object.keys(allClinicsDailyData).forEach(name=>{ if(name!== 'Allerton') delete allClinicsDailyData[name];});
+                    }
                     // Refresh Daily Numbers tab now that data is ready
                     renderDailyCurrent();
                     console.log('Daily metrics loaded');
