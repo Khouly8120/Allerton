@@ -3427,6 +3427,67 @@ window.addEventListener('load', function() {
     observer.observe(document.body, { childList: true, subtree: true });
     }
     
+    // Initialize date pickers for filters
+    function initializeDatePickers() {
+        console.log('Initializing date pickers...');
+        
+        // Initialize daterangepicker for weekly date filter
+        $('#weekDateFilter').daterangepicker({
+            opens: 'left',
+            autoApply: true,
+            startDate: moment().subtract(2, 'month'),
+            endDate: moment(),
+            locale: {
+                format: 'MM/DD/YYYY'
+            }
+        });
+        
+        // Initialize daterangepicker for daily date filter
+        $('#dayDateFilter').daterangepicker({
+            opens: 'left',
+            autoApply: true,
+            startDate: moment().subtract(1, 'month'),
+            endDate: moment(),
+            locale: {
+                format: 'MM/DD/YYYY'
+            }
+        });
+
+        // Initialize daterangepicker for historical trends date filter
+        $('#historicalDateFilter').daterangepicker({
+            opens: 'left',
+            autoApply: true,
+            startDate: moment().subtract(3, 'month'),
+            endDate: moment(),
+            locale: {
+                format: 'MM/DD/YYYY'
+            }
+        });
+
+        // Initialize daterangepicker for comparison date filters
+        $('#period1DateFilter').daterangepicker({
+            opens: 'left',
+            autoApply: true,
+            startDate: moment().subtract(2, 'month'),
+            endDate: moment().subtract(1, 'month'),
+            locale: {
+                format: 'MM/DD/YYYY'
+            }
+        });
+        
+        $('#period2DateFilter').daterangepicker({
+            opens: 'left',
+            autoApply: true,
+            startDate: moment().subtract(1, 'month'),
+            endDate: moment(),
+            locale: {
+                format: 'MM/DD/YYYY'
+            }
+        });
+        
+        console.log('Date pickers initialized successfully');
+    }
+    
     console.log('Allerton-only filtering applied');
 </script>
 </body>
