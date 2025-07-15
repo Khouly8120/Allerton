@@ -3327,9 +3327,12 @@ window.addEventListener('load', function() {
     
     console.log("Allerton-only filtering applied");
 });
-    // Filter data to only show Allerton clinic
+    // Function to filter data to Allerton clinic only
     function filterToAllertonClinicOnly() {
-        console.log('Filtering all data to only show Allerton clinic');
+        // Filter clinic list
+        if (typeof clinicList !== 'undefined') {
+            clinicList = ['Allerton'];
+        }
         
         // Filter weekly data
         if (typeof allClinicsData !== 'undefined') {
