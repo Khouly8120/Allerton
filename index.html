@@ -3286,7 +3286,169 @@ function populateCardView(data) {
                     console.log("Export complete.");
                 }
         
-            </script>
+            
+// Function to filter all data to only show Allerton clinic
+function filterToAllertonOnly(data) {
+    if (!data || !Array.isArray(data)) return [];
+    return data.filter(entry => entry.Clinic === 'Allerton');
+}
+
+// Override data loading functions to filter data
+const originalProcessAndStoreData = processAndStoreData;
+processAndStoreData = function(parsedData) {
+    // First run the original function
+    originalProcessAndStoreData(parsedData);
+    
+    // Then filter all clinic data to only include Allerton
+    console.log("Filtering data to show only Allerton clinic");
+    
+    // Filter the allClinicsData object
+    for (const weekKey in allClinicsData) {
+        allClinicsData[weekKey] = allClinicsData[weekKey].filter(entry => entry.Clinic === 'Allerton');
+    }
+    
+    // Re-calculate available clinics
+    populateClinicOptions();
+}
+
+// Override clinic selector population to only show Allerton
+const originalPopulateClinicOptions = populateClinicOptions;
+populateClinicOptions = function() {
+    originalPopulateClinicOptions();
+    
+    // Get all clinic selector dropdowns
+    const clinicSelectors = document.querySelectorAll('select.clinic-selector');
+    clinicSelectors.forEach(selector => {
+        // Clear all options and only add Allerton
+        selector.innerHTML = '<option value="Allerton">Allerton</option>';
+        selector.value = 'Allerton';
+        
+        // Disable the selector since there's only one option
+        selector.disabled = true;
+    });
+    
+    console.log("Clinic selectors set to Allerton only");
+}
+
+// Filter daily data to only show Allerton
+if (typeof allClinicsDailyData !== 'undefined') {
+    const clinics = Object.keys(allClinicsDailyData);
+    for (const clinic of clinics) {
+        if (clinic !== 'Allerton') {
+            delete allClinicsDailyData[clinic];
+        }
+    }
+}
+
+// Add event listener to ensure all data is filtered after dashboard is fully loaded
+window.addEventListener('load', function() {
+    // Set dashboard title to clearly indicate this is Allerton-specific
+    document.title = "Allerton Clinic Dashboard";
+    const mainHeaders = document.querySelectorAll('h1');
+    if (mainHeaders.length > 0) {
+        mainHeaders[0].textContent = "Allerton Clinic Dashboard";
+    }
+    
+    console.log("Allerton-only filtering applied");
+});
+    // Filter data to only show Allerton clinic
+    function filterToAllertonClinicOnly() {
+        console.log('Filtering all data to only show Allerton clinic');
+        
+        // Filter weekly data
+        if (typeof allClinicsData !== 'undefined') {
+            for (const weekKey in allClinicsData) {
+                if (Array.isArray(allClinicsData[weekKey])) {
+                    allClinicsData[weekKey] = allClinicsData[weekKey].filter(entry => entry.Clinic === 'Allerton');
+                }
+            }
+        }
+        
+        // Filter daily data
+        if (typeof allClinicsDailyData !== 'undefined') {
+            for (const clinic in allClinicsDailyData) {
+                if (clinic !== 'Allerton') {
+                    delete allClinicsDailyData[clinic];
+                }
+            }
+        }
+        
+        // Filter displayed data
+        if (typeof displayedData !== 'undefined' && Array.isArray(displayedData)) {
+            displayedData = displayedData.filter(entry => entry.Clinic === 'Allerton');
+        }
+        
+        // Filter comparison data
+        if (typeof comparisonData !== 'undefined' && Array.isArray(comparisonData)) {
+            comparisonData = comparisonData.filter(entry => entry.Clinic === 'Allerton');
+        }
+        
+        // Filter current week data
+        if (typeof currentWeekData !== 'undefined' && Array.isArray(currentWeekData)) {
+            currentWeekData = currentWeekData.filter(entry => entry.Clinic === 'Allerton');
+        }
+        
+        // Force clinic selectors to only show Allerton
+        document.querySelectorAll('.clinic-selector, select[id^="clinicSelect"]').forEach(selector => {
+            if (selector) {
+                selector.innerHTML = '<option value="Allerton">Allerton</option>';
+                selector.value = 'Allerton';
+                selector.disabled = true;
+            }
+        });
+    }
+    
+    // Modify the existing initialization function to apply our filter
+    const originalInitializeDashboard = window.initializeDashboard;
+    window.initializeDashboard = async function() {
+        await originalInitializeDashboard();
+        filterToAllertonClinicOnly();
+    };
+    
+    // Add event listeners to ensure filtering is applied after any data operations
+    document.addEventListener('DOMContentLoaded', function() {
+        // Override the populateClinicOptions function if it exists
+        if (typeof populateClinicOptions === 'function') {
+            const originalPopulateClinicOptions = populateClinicOptions;
+            populateClinicOptions = function() {
+                originalPopulateClinicOptions();
+                // Force all clinic selectors to only show Allerton
+                document.querySelectorAll('.clinic-selector, select[id^="clinicSelect"]').forEach(selector => {
+                    if (selector) {
+                        selector.innerHTML = '<option value="Allerton">Allerton</option>';
+                        selector.value = 'Allerton';
+                        selector.disabled = true;
+                    }
+                });
+            };
+        }
+        
+        // Also filter immediately when DOM is loaded
+        filterToAllertonClinicOnly();
+    });
+    
+    // Add listener for any dynamic clinic selector that might be added later
+    const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.addedNodes && mutation.addedNodes.length > 0) {
+                for (let i = 0; i < mutation.addedNodes.length; i++) {
+                    const node = mutation.addedNodes[i];
+                    if (node.nodeType === 1 && (node.classList.contains('clinic-selector') || 
+                        (node.id && node.id.startsWith('clinicSelect')))) {
+                        node.innerHTML = '<option value="Allerton">Allerton</option>';
+                        node.value = 'Allerton';
+                        node.disabled = true;
+                    }
+                }
+            }
+        });
+    });
+    
+    // Start observing the document body for changes
+    observer.observe(document.body, { childList: true, subtree: true });
+    
+    console.log('Allerton-only filtering applied');
+</script>
         </body>
         </html>
         
