@@ -1690,7 +1690,25 @@
                         renderDailyPivot();
                     });
                 }
-                // Generate HTML for a daily metric cell similar to weekly view
+                // Generate HTML for a metric cell with alert badge
+function generateMetricCell(entry, metricId){
+    const csvHeader = metricId.charAt(0).toUpperCase()+metricId.slice(1);
+    const rawVal = entry[csvHeader];
+    const metricMeta = (typeof metricsDefinition!=='undefined' && metricsDefinition.find(m=>m.id===metricId)) || {type:'number'};
+    let display = 'N/A';
+    if(rawVal!==null && rawVal!==undefined && rawVal!==''){
+        if(metricMeta.type==='percentage'){
+            const num=parseFloat(rawVal);
+            display = isNaN(num)? rawVal : num.toFixed(1)+'%';
+        } else {
+            display = rawVal;
+        }
+    }
+    const alertLevel = entry[metricId+'Alert']||'normal';
+    return `<td class="metric-value"><span class="alert-badge alert-${alertLevel}">${display}</span></td>`;
+}
+
+// Generate HTML for a daily metric cell similar to weekly view
                 function toNumeric(val){
                     if(typeof val==='number') return val;
                     if(typeof val==='string'){
