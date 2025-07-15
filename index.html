@@ -1705,7 +1705,20 @@ function generateMetricCell(entry, metricId){
         }
     }
     const alertLevel = entry[metricId+'Alert']||'normal';
-    return `<td class=\"metric-value\"><span class=\"alert-badge alert-${alertLevel}\">${display}</span></td>`;
+    const target   = entry[csvHeader+'Target'];
+    const trend    = entry[metricId+'Trend'];
+    const arrow = getTrendArrow(trend);
+    let arrowSpan = arrow ? `<span class=\"trend-arrow trend-${trend||'same'}\">${arrow}</span>` : '';
+    let targetText = 'Target: N/A';
+    if(target!==undefined && target!==null && target!==''){
+        let tDisplay = target;
+        if(metricMeta.type==='percentage'){
+            const n=parseFloat(target);
+            tDisplay = isNaN(n)? target : n.toFixed(1)+'%';
+        }
+        targetText = `Target: ${tDisplay}`;
+    }
+    return `<td class=\"metric-value\">\n                <span class=\"alert-badge alert-${alertLevel}\">${display}</span>\n                ${arrowSpan}\n                <div class=\"deviation\">${targetText}</div>\n            </td>`;
 }
 
 // --- Utility Function: Populate Card View ---
