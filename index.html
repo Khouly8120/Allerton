@@ -1696,8 +1696,12 @@
                 // Generate HTML for a metric cell with alert badge
 function generateMetricCell(entry, metricId){
     const csvHeader = metricId.charAt(0).toUpperCase()+metricId.slice(1);
-    const rawVal = entry[csvHeader];
-    const metricMeta = (typeof metricsDefinition!=='undefined' && metricsDefinition.find(m=>m.id===metricId)) || {type:'number'};
+    const rawVal   = entry[csvHeader];
+    const target   = entry[csvHeader+'Target']; // may be pre-computed in dataset
+    const trend    = entry[metricId+'Trend'];   // expected values: 'up','down','same'
+    const alertLevel = entry[metricId+'Alert']||'normal';
+    const metricMeta = metricsDefinition.find(m=>m.id===metricId) || {type:'number'};
+
     let display = 'N/A';
     if(rawVal!==null && rawVal!==undefined && rawVal!==''){
         if(metricMeta.type==='percentage'){
@@ -1707,30 +1711,11 @@ function generateMetricCell(entry, metricId){
             display = rawVal;
         }
     }
-    const alertLevel = entry[metricId+'Alert']||'normal';
-    const target   = entry[csvHeader+'Target'];
-    const trend    = entry[metricId+'Trend'];
     const arrow = getTrendArrow(trend);
-    let arrowSpan = arrow ? `<span class=\"trend-arrow trend-${trend||'same'}\">${arrow}</span>` : '';
-    // Determine target: use benchmarkData for entry week if available
-    const benchKey = (typeof benchmarkData!=='undefined') ? `${entry.Year}-W${entry.Week}` : null;
-    let benchTarget;
-    if(benchKey && benchmarkData[benchKey]){
-        benchTarget = benchmarkData[benchKey][csvHeader];
+    let arrowSpan='';
+    if(arrow){
+        arrowSpan=`<span class="trend-arrow trend-${trend||'same'}">${arrow}</span>`;
     }
-    const targetVal = (benchTarget!==undefined && benchTarget!==null && benchTarget!=='') ? benchTarget : target;
-
-    let targetText = 'Target: N/A';
-    if(targetVal!==undefined && targetVal!==null && targetVal!==''){
-        let tDisplay = targetVal;
-        if(metricMeta.type==='percentage'){
-            const n=parseFloat(targetVal);
-            tDisplay = isNaN(n)? targetVal : n.toFixed(1)+'%';
-        }
-        targetText = `Target: ${tDisplay}`;
-    }
-    return `<td class=\"metric-value\">\n                <span class=\"alert-badge alert-${alertLevel}\">${display}</span>\n                ${arrowSpan}\n                <div class=\"deviation\">${targetText}</div>\n            </td>`;
-}
 
 // --- Utility Function: Populate Card View ---
 function populateCardView(data) {
