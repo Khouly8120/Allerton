@@ -3475,20 +3475,351 @@ window.addEventListener('load', function() {
             }
         });
         
-        $('#period2DateFilter').daterangepicker({
-            opens: 'left',
-            autoApply: true,
-            startDate: moment().subtract(1, 'month'),
-            endDate: moment(),
-            locale: {
-                format: 'MM/DD/YYYY'
-            }
-        });
-        
-        console.log('Date pickers initialized successfully');
+    
+    $('#period2DateFilter').daterangepicker({
+        opens: 'left',
+        autoApply: true,
+        startDate: moment().subtract(1, 'month'),
+        endDate: moment(),
+        locale: {
+            format: 'MM/DD/YYYY'
+        }
+    });
+    
+    console.log('Date pickers initialized successfully');
+}
+
+// Function to filter data to Allerton clinic only
+function filterToAllertonClinicOnly() {
+    // Filter clinic list
+    if (typeof clinicList !== 'undefined') {
+        clinicList = ['Allerton'];
     }
     
-    console.log('Allerton-only filtering applied');
+    // Filter weekly data
+    if (typeof allClinicsData !== 'undefined') {
+        for (const weekKey in allClinicsData) {
+            if (Array.isArray(allClinicsData[weekKey])) {
+                allClinicsData[weekKey] = allClinicsData[weekKey].filter(entry => entry.Clinic === 'Allerton');
+            }
+        }
+    }
+    
+    // Filter daily data
+    if (typeof allClinicsDailyData !== 'undefined') {
+        for (const clinic in allClinicsDailyData) {
+            if (clinic !== 'Allerton') {
+                delete allClinicsDailyData[clinic];
+            }
+        }
+    }
+    
+    // Filter displayed data
+    if (typeof displayedData !== 'undefined' && Array.isArray(displayedData)) {
+        displayedData = displayedData.filter(entry => entry.Clinic === 'Allerton');
+    }
+    
+    // Filter comparison data
+    if (typeof comparisonData !== 'undefined' && Array.isArray(comparisonData)) {
+        comparisonData = comparisonData.filter(entry => entry.Clinic === 'Allerton');
+    }
+    
+    // Filter current week data
+    if (typeof currentWeekData !== 'undefined' && Array.isArray(currentWeekData)) {
+        currentWeekData = currentWeekData.filter(entry => entry.Clinic === 'Allerton');
+    }
+    
+    // Force clinic selectors to only show Allerton
+    document.querySelectorAll('.clinic-selector, select[id^="clinicSelect"]').forEach(selector => {
+        if (selector) {
+            selector.innerHTML = '<option value="Allerton">Allerton</option>';
+            selector.value = 'Allerton';
+            selector.disabled = true;
+        }
+    });
+}
+
+// Modify the existing initialization function to apply our filter
+const originalInitializeDashboard = window.initializeDashboard;
+window.initializeDashboard = async function() {
+    await originalInitializeDashboard();
+    filterToAllertonClinicOnly();
+};
+
+// Add event listeners to ensure filtering is applied after any data operations
+document.addEventListener('DOMContentLoaded', function() {
+    // Override the populateClinicOptions function if it exists
+    if (typeof populateClinicOptions === 'function') {
+        const originalPopulateClinicOptions = populateClinicOptions;
+        populateClinicOptions = function() {
+            originalPopulateClinicOptions();
+            // Force all clinic selectors to only show Allerton
+            document.querySelectorAll('.clinic-selector, select[id^="clinicSelect"]').forEach(selector => {
+                if (selector) {
+                    selector.innerHTML = '<option value="Allerton">Allerton</option>';
+                    selector.value = 'Allerton';
+                    selector.disabled = true;
+                }
+            });
+        };
+    }
+    
+    // Also filter immediately when DOM is loaded
+    filterToAllertonClinicOnly();
+});
+
+// Add listener for any dynamic clinic selector that might be added later
+const observer = new MutationObserver(function(mutations) {
+    mutations.forEach(function(mutation) {
+        if (mutation.addedNodes && mutation.addedNodes.length > 0) {
+            for (let i = 0; i < mutation.addedNodes.length; i++) {
+                const node = mutation.addedNodes[i];
+                if (node.nodeType === 1 && (node.classList.contains('clinic-selector') || 
+                    (node.id && node.id.startsWith('clinicSelect')))) {
+                    node.innerHTML = '<option value="Allerton">Allerton</option>';
+                    node.value = 'Allerton';
+                    node.disabled = true;
+                }
+            }
+        }
+    });
+});
+
+// Start observing the document body for changes
+observer.observe(document.body, { childList: true, subtree: true });
+
+// Initialize date pickers for filters
+function initializeDatePickers() {
+    console.log('Initializing date pickers...');
+    
+    // Initialize daterangepicker for weekly date filter
+    $('#weekDateFilter').daterangepicker({
+        opens: 'left',
+        autoApply: true,
+        startDate: moment().subtract(2, 'month'),
+        endDate: moment(),
+        locale: {
+            format: 'MM/DD/YYYY'
+        }
+    });
+    
+    // Initialize daterangepicker for daily date filter
+    $('#dayDateFilter').daterangepicker({
+        opens: 'left',
+        autoApply: true,
+        startDate: moment().subtract(1, 'month'),
+        endDate: moment(),
+        locale: {
+            format: 'MM/DD/YYYY'
+        }
+    });
+
+    // Initialize daterangepicker for historical trends date filter
+    $('#historicalDateFilter').daterangepicker({
+        opens: 'left',
+        autoApply: true,
+        startDate: moment().subtract(3, 'month'),
+        endDate: moment(),
+        locale: {
+            format: 'MM/DD/YYYY'
+        }
+    });
+
+    // Initialize daterangepicker for comparison date filters
+    $('#period1DateFilter').daterangepicker({
+        opens: 'left',
+        autoApply: true,
+        startDate: moment().subtract(2, 'month'),
+        endDate: moment().subtract(1, 'month'),
+        locale: {
+            format: 'MM/DD/YYYY'
+        }
+    });
+    
+    $('#period2DateFilter').daterangepicker({
+        opens: 'left',
+        autoApply: true,
+        startDate: moment().subtract(1, 'month'),
+        endDate: moment(),
+        locale: {
+            format: 'MM/DD/YYYY'
+        }
+    });
+    
+    console.log('Date pickers initialized successfully');
+}
+
+console.log('Allerton-only filtering applied');
+
+// Function to populate metric selector buttons
+function populateMetricSelector() {
+    console.log('Populating metric selector...');
+    const metricSelector = document.getElementById('metricSelector');
+    if (!metricSelector) {
+        console.warn('Metric selector element not found');
+        return;
+    }
+    
+    // Clear existing buttons
+    metricSelector.innerHTML = '';
+    
+    // Add metric buttons for metrics that have numerical values
+    const numericalMetrics = metricsDefinition.filter(m => 
+        m.type === 'percentage' || m.type === 'number');
+        
+    numericalMetrics.forEach(metric => {
+        const button = document.createElement('button');
+        button.textContent = metric.name;
+        button.dataset.metric = metric.id;
+        button.onclick = function() {
+            // Remove active class from all buttons
+            document.querySelectorAll('#metricSelector button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            // Add active class to clicked button
+            this.classList.add('active');
+            // Update selected metric and refresh charts
+            selectedMetric = this.dataset.metric;
+            updateHistoricalCharts();
+        };
+        if (metric.id === selectedMetric) {
+            button.classList.add('active');
+        }
+        metricSelector.appendChild(button);
+    });
+    
+    console.log('Metric selector populated successfully');
+}
+
+// Function to render daily pivot table
+function renderDailyPivot() {
+    console.log('Rendering daily pivot table...');
+    
+    // Get selected metric from dropdown
+    const metricSelector = document.getElementById('dailyMetricSelector');
+    if (!metricSelector) {
+        console.warn('Daily metric selector not found');
+        return;
+    }
+    
+    const selectedMetric = metricSelector.value;
+    const metricName = metricSelector.options[metricSelector.selectedIndex].text;
+    
+    // Get date range if available
+    let startDate = null;
+    let endDate = null;
+    
+    const dateRangePicker = document.getElementById('dateRangePickerDaily');
+    if (dateRangePicker && dateRangePicker.value) {
+        const dates = dateRangePicker.value.split(' - ');
+        if (dates.length === 2) {
+            startDate = moment(dates[0], 'MM/DD/YYYY');
+            endDate = moment(dates[1], 'MM/DD/YYYY');
+        }
+    }
+    
+    // If no date range selected, use last 14 days
+    if (!startDate || !endDate) {
+        endDate = moment();
+        startDate = moment().subtract(14, 'days');
+    }
+    
+    // Get data for Allerton clinic only
+    const clinicData = allClinicsDailyData['Allerton'] || [];
+    if (!clinicData.length) {
+        document.getElementById('dailyTableBody').innerHTML = '<tr><td colspan="8">No daily data available for Allerton clinic</td></tr>';
+        return;
+    }
+    
+    // Filter data by date range
+    const filteredData = clinicData.filter(entry => {
+        const entryDate = moment(entry.Date, 'MM/DD/YYYY');
+        return entryDate.isSameOrAfter(startDate) && entryDate.isSameOrBefore(endDate);
+    });
+    
+    if (!filteredData.length) {
+        document.getElementById('dailyTableBody').innerHTML = '<tr><td colspan="8">No data available for the selected date range</td></tr>';
+        return;
+    }
+    
+    // Group data by date
+    const dateGroups = {};
+    filteredData.forEach(entry => {
+        const date = entry.Date;
+        if (!dateGroups[date]) {
+            dateGroups[date] = [];
+        }
+        dateGroups[date].push(entry);
+    });
+    
+    // Sort dates
+    const sortedDates = Object.keys(dateGroups).sort((a, b) => {
+        return moment(a, 'MM/DD/YYYY').diff(moment(b, 'MM/DD/YYYY'));
+    });
+    
+    // Create table header
+    let headerHtml = '<tr><th>Date</th><th>Value</th><th>Target</th><th>Status</th></tr>';
+    document.getElementById('dailyTableHead').innerHTML = headerHtml;
+    
+    // Create table body
+    let bodyHtml = '';
+    sortedDates.forEach(date => {
+        const entries = dateGroups[date];
+        if (entries && entries.length > 0) {
+            const entry = entries[0]; // Take the first entry for each date
+            
+            // Get the metric value and benchmark
+            const value = parseFloat(entry[selectedMetric]) || 0;
+            let target = 0;
+            
+            // Get benchmark for this metric if available
+            if (dailyBenchmarkData && dailyBenchmarkData[selectedMetric]) {
+                target = parseFloat(dailyBenchmarkData[selectedMetric]) || 0;
+            }
+            
+            // Determine status based on value vs target
+            let statusClass = 'alert-normal';
+            let statusText = 'Normal';
+            
+            const higherIsBetter = true; // Modify this logic based on metric definition
+            
+            if (higherIsBetter) {
+                if (value < target * 0.7) {
+                    statusClass = 'alert-critical';
+                    statusText = 'Critical';
+                } else if (value < target * 0.9) {
+                    statusClass = 'alert-high';
+                    statusText = 'Alert';
+                } else if (value < target * 0.95) {
+                    statusClass = 'alert-low';
+                    statusText = 'Warning';
+                }
+            } else {
+                if (value > target * 1.3) {
+                    statusClass = 'alert-critical';
+                    statusText = 'Critical';
+                } else if (value > target * 1.1) {
+                    statusClass = 'alert-high';
+                    statusText = 'Alert';
+                } else if (value > target * 1.05) {
+                    statusClass = 'alert-low';
+                    statusText = 'Warning';
+                }
+            }
+            
+            bodyHtml += `<tr>
+                <td class="pivot-date">${date}</td>
+                <td class="pivot-value">${value}</td>
+                <td class="pivot-target">${target}</td>
+                <td><span class="alert-badge ${statusClass}">${statusText}</span></td>
+            </tr>`;
+        }
+    });
+    
+    document.getElementById('dailyTableBody').innerHTML = bodyHtml || '<tr><td colspan="4">No data available</td></tr>';
+    console.log('Daily pivot table rendered successfully');
+}
+
 </script>
 </body>
 </html>
