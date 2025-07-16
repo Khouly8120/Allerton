@@ -972,6 +972,36 @@
                 };
                 let validationMessages = []; // Store validation messages
         
+                // --- Utility Functions ---
+        
+                function showLoading(message) {
+                    const loadingIndicator = document.getElementById('loadingIndicator');
+                    if (loadingIndicator) {
+                        loadingIndicator.querySelector('p').textContent = message || 'Loading...';
+                        loadingIndicator.style.display = 'flex';
+                    }
+                }
+
+                function hideLoading() {
+                    const loadingIndicator = document.getElementById('loadingIndicator');
+                    if (loadingIndicator) {
+                        loadingIndicator.style.display = 'none';
+                    }
+                }
+
+                function getAlertLevel(value, thresholds, higherIsBetter) {
+                    if (higherIsBetter) {
+                        if (value < thresholds.critical) return 'Critical';
+                        if (value < thresholds.high) return 'High';
+                        if (value < thresholds.low) return 'Low';
+                    } else {
+                        if (value > thresholds.critical) return 'Critical';
+                        if (value > thresholds.high) return 'High';
+                        if (value > thresholds.low) return 'Low';
+                    }
+                    return 'Normal';
+                }
+
                 // --- Core Functions ---
         
                 // Initial setup function called after Google Charts loads
