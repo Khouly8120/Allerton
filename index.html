@@ -3904,28 +3904,28 @@ function generateDailyMetricCell(row, metricId){
             {
                 'Date of meeting': '01-15-2024',
                 'Done': 'TRUE',
-                'Clinic': 'Downtown Clinic',
+                'Clinic': 'Allerton',
                 'Metric': 'Patient Satisfaction',
                 'Notes': 'Implemented new feedback system, satisfaction scores improved by 15%'
             },
             {
                 'Date of meeting': '01-15-2024',
                 'Done': 'FALSE',
-                'Clinic': 'Westside Clinic',
+                'Clinic': 'Allerton',
                 'Metric': 'Wait Times',
                 'Notes': 'Need to optimize scheduling system to reduce average wait time'
             },
             {
                 'Date of meeting': '01-22-2024',
                 'Done': 'TRUE',
-                'Clinic': 'Downtown Clinic',
+                'Clinic': 'Allerton',
                 'Metric': 'Staff Training',
                 'Notes': 'Completed customer service training for all front desk staff'
             },
             {
                 'Date of meeting': '01-22-2024',
                 'Done': 'FALSE',
-                'Clinic': 'Eastside Clinic',
+                'Clinic': 'Allerton',
                 'Metric': 'Equipment Maintenance',
                 'Notes': 'Schedule maintenance for MRI machine next week'
             }
@@ -3951,7 +3951,11 @@ function generateDailyMetricCell(row, metricId){
                 return getSampleMeetingNotesData();
             }
             
-            return parsedData;
+            // Filter for Allerton clinic only
+            const allertonData = parsedData.filter(note => note.Clinic === 'Allerton');
+            console.log(`Filtered ${allertonData.length} Allerton clinic meeting notes from ${parsedData.length} total records`);
+            
+            return allertonData;
         } catch (error) {
             console.warn("Error fetching meeting notes data from Google Sheets:", error.message);
             console.log("Using sample data instead.");
