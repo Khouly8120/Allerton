@@ -919,11 +919,10 @@
                     <option value="normal">Normal Only</option>
                 </select>
             </div>
-            <div class="filter-group">
+            <div class="filter-group" style="display: none;">
                 <label>Filter by Clinic:</label>
                 <select id="clinicFilter" onchange="filterTable()" disabled>
-                    <option value="all">All Clinics</option>
-                    <!-- Clinic options will be populated dynamically -->
+                    <option value="Allerton" selected>Allerton Clinic</option>
                 </select>
             </div>
             <div class="filter-group">
@@ -1023,11 +1022,10 @@
                             <label>Date Range:</label>
                             <input type="text" id="dateRangePicker" class="date-range-picker" disabled/>
                         </div>
-                        <div class="filter-group">
+                        <div class="filter-group" style="display: none;">
                             <label>Select Clinic:</label>
                             <select id="clinicSelector" onchange="updateHistoricalCharts()" disabled>
-                                <option value="all">All Clinics</option>
-                                <!-- Clinic options will be populated dynamically -->
+                                <option value="Allerton" selected>Allerton Clinic</option>
                             </select>
                         </div>
                         <div class="filter-group">
@@ -1054,22 +1052,20 @@
                     </div>
     
                     <div id="comparisonOptionsWeekToWeek" class="comparison-options active">
-                        <div class="filter-group">
+                        <div class="filter-group" style="display: none;">
                             <label>Select Clinic:</label>
                             <select id="compareClinicSelectorW2W" disabled>
-                                <option value="all">All Clinics</option>
-                                <!-- Clinic options will be populated dynamically -->
+                                <option value="Allerton" selected>Allerton Clinic</option>
                             </select>
                         </div>
                         <button class="action-button" onclick="runComparison('week-to-week')" disabled>Run Comparison</button>
                     </div>
     
                     <div id="comparisonOptions4Weeks" class="comparison-options">
-                        <div class="filter-group">
+                        <div class="filter-group" style="display: none;">
                             <label>Select Clinic:</label>
                             <select id="compareClinicSelector4W" disabled>
-                                <option value="all">All Clinics</option>
-                                <!-- Clinic options will be populated dynamically -->
+                                <option value="Allerton" selected>Allerton Clinic</option>
                             </select>
                         </div>
                         <div class="filter-group">
@@ -1085,11 +1081,10 @@
                     </div>
     
                     <div id="comparisonOptionsCustomRanges" class="comparison-options">
-                        <div class="filter-group">
+                        <div class="filter-group" style="display: none;">
                             <label>Select Clinic:</label>
                             <select id="compareClinicSelectorCR" disabled>
-                                <option value="all">All Clinics</option>
-                                <!-- Clinic options will be populated dynamically -->
+                                <option value="Allerton" selected>Allerton Clinic</option>
                             </select>
                         </div>
                         <div class="filter-group">
@@ -1619,19 +1614,22 @@
                 const weekSet = new Set();
                 let processedEntryCount = 0;
     
-                // Group data by clinic
+                // Group data by clinic - filter for Allerton only
                 parsedData.forEach(entry => {
                     const clinicName = entry.Clinic;
-                    if (!allClinicsData[clinicName]) {
-                        allClinicsData[clinicName] = [];
-                    }
-                    allClinicsData[clinicName].push(entry);
-                    
-                    // Track available weeks
-                    const weekKey = `${entry.Year}-W${entry.Week}`;
-                    if (!weekSet.has(weekKey)) {
-                        weekSet.add(weekKey);
-                        availableWeeks.push({ year: entry.Year, week: entry.Week });
+                    // Only process Allerton clinic data
+                    if (clinicName === 'Allerton') {
+                        if (!allClinicsData[clinicName]) {
+                            allClinicsData[clinicName] = [];
+                        }
+                        allClinicsData[clinicName].push(entry);
+                        
+                        // Track available weeks
+                        const weekKey = `${entry.Year}-W${entry.Week}`;
+                        if (!weekSet.has(weekKey)) {
+                            weekSet.add(weekKey);
+                            availableWeeks.push({ year: entry.Year, week: entry.Week });
+                        }
                     }
                 });
     
@@ -1883,8 +1881,11 @@
                         const val=parseFloat(r[col]); if(!isNaN(val)) r[col]=val;
                     });
                     const clinic=r.Clinic;
-                    if(!allClinicsDailyData[clinic]) allClinicsDailyData[clinic]=[];
-                    allClinicsDailyData[clinic].push(r);
+                    // Only process Allerton clinic data
+                    if(clinic === 'Allerton') {
+                        if(!allClinicsDailyData[clinic]) allClinicsDailyData[clinic]=[];
+                        allClinicsDailyData[clinic].push(r);
+                    }
                     if(r.Date>maxDate) maxDate=r.Date;
                 });
                 latestDailyDate=maxDate;
